@@ -1,9 +1,10 @@
 #include <unistd.h>
-#include "ncursespp.hpp"
+#include "ioconsole.hpp"
+using udh::NCursesConsole;
 
 int main() {
 	sleep(1);
-	auto screen = ncurses::Get();
+	auto screen = NCursesConsole::Get();
 	screen->refreshScreen();
 	sleep(1);
 	auto& f = screen->getFrame();

@@ -1,7 +1,9 @@
-#include "ncursespp.hpp"
+#include "ioconsole.hpp"
 #include <ncurses.h>
 
-ncurses::ncurses() {
+using namespace udh;
+
+NCursesConsole::NCursesConsole() {
 	initscr();
 	cbreak();
 	noecho();
@@ -14,11 +16,11 @@ ncurses::ncurses() {
 	refreshScreen();
 }
 
-ncurses::~ncurses() { endwin(); }
+NCursesConsole::~NCursesConsole() { endwin(); }
 
-frame& ncurses::getFrame() { return display; }
+frame& NCursesConsole::getFrame() { return display; }
 
-void ncurses::refreshScreen() {
+void NCursesConsole::refreshScreen() {
 	// debug(2, "drawToScreen");
 	for (uint row = 0; row < display.size().first; row++) {
 		wmove((WINDOW*)win, row, 0);
@@ -28,17 +30,17 @@ void ncurses::refreshScreen() {
 	wrefresh((WINDOW*)win);
 }
 
-void ncurses::screenResizedTriger(int code) {
+void NCursesConsole::screenResizedTriger(int code) {
 	// debug(1, "screenResizedTriger: " + std::to_string(code));
 	getmaxyx((WINDOW*)win, screenRows, screenCols);
 	refreshScreen();
 }
 
-int ncurses::getKey() const {
+int NCursesConsole::getKey() const {
 	nodelay(stdscr, FALSE);
 	return getch();
 }
 
-std::pair<uint, uint> ncurses::size() const {
+std::pair<uint, uint> NCursesConsole::size() const {
 	return std::make_pair(screenRows, screenCols);
 }
