@@ -6,7 +6,8 @@ int main() {
 	auto screen = ncurses::Get();
 	screen->refreshScreen();
 	sleep(1);
-	screen->getFrame()[1][1] = 'a';
+	auto& f = screen->getFrame();
+	f[1][1] = 'a';
 	screen->refreshScreen();
 	sleep(1);
 }
