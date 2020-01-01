@@ -1,6 +1,6 @@
 #include "snek_class.hpp"
 #include <unistd.h>
-#include "ioconsole.hpp"
+#include "../ioconsole.hpp"
 
 using udh::cio;
 
