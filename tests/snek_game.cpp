@@ -1,4 +1,4 @@
-#include "snek_class.hpp"
+#include "snek_game.hpp"
 #include <unistd.h>
 #include "../ioconsole.hpp"
 
