@@ -1,0 +1,18 @@
+* Console IO Library
+
+I have long preferred graphics libraries where the program asks the
+user for input rather than the user asking the program to respond.  I
+have preferred this style both as a user and as a programmer.
+However, there is little support for this style of interface.  This
+library is meant to mimic the feeling of [[https://en.cppreference.com/w/cpp/io/cin][~std::cin~]] and [[https://en.cppreference.com/w/cpp/io/cout][~std::cout~]].
+Currently the library is wrapping [[https://www.gnu.org/software/ncurses/][ncurses]] to achieve this, but
+hopefully the dependency will be temporary.
+
+** TODOs
+
+   - [ ] flush out the ~udh::console~ class and ~udh::cio~ to match
+     [[https://en.cppreference.com/w/cpp/io/basic_ostream][~std::ostream~]] and [[https://en.cppreference.com/w/cpp/io/basic_istream][~std::istream~]] more closely.
+
+   - [ ] Don't depend on ncurses.
+
+   - [ ] Make the snake test/example more complete.
