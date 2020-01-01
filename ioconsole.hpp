@@ -59,18 +59,10 @@ class basic_console {  //: virtual public basic_ios<_CharT,_Traits>{
 	                                 basic_console& (*__pf)(basic_console&)) {
 		return __pf(lhs);
 	}
-	/*
-	  The same thing for the base classes?
-
-	  basic_ostream& operator<<(basic_ios<char_type, traits_type>&(*__pf)(
-	  basic_ios<char_type,traits_type>&)){
-	  __pf(*this);
-	  return *this;
-	  }
-
-	  basic_ostream& operator<<(ios_base& (*__pf)(ios_base&)){ __pf(*this); return
-	  *this; }
-	*/
+	friend basic_console& operator>>(basic_console& lhs,
+	                                 basic_console& (*__pf)(basic_console&)) {
+		return __pf(lhs);
+	}
 
 	// Force implimentation of most basic types.
 	// TODO: Commented out tempraraly because I want to be lazy.
@@ -95,6 +87,81 @@ class basic_console {  //: virtual public basic_ios<_CharT,_Traits>{
 	virtual basic_console& put(char_type) = 0;
 	// virtual basic_console& write(const char_type*, streamsize)=0;
 	virtual basic_console& flush() = 0;
+
+	// virtual basic_console& operator>>(basic_streambuf<char_type,
+	// traits_type>*)=0;
+
+	// virtual basic_console& operator>>(bool&)=0;
+	// virtual basic_console& operator>>(short&)=0;
+	// virtual basic_console& operator>>(unsigned short&)=0;
+	// virtual basic_console& operator>>(int&)=0;
+	// virtual basic_console& operator>>(unsigned int&)=0;
+	// virtual basic_console& operator>>(long&)=0;
+	// virtual basic_console& operator>>(unsigned long&)=0;
+	// virtual basic_console& operator>>(long long&)=0;
+	// virtual basic_console& operator>>(unsigned long long&)=0;
+	// virtual basic_console& operator>>(float&)=0;
+	// virtual basic_console& operator>>(double&)=0;
+	// virtual basic_console& operator>>(long double&)=0;
+	// virtual basic_console& operator>>(void*&)=0;
+
+	/*
+	streamsize gcount() const { return __gc_; }
+	int_type get();
+
+	basic_console& get(char_type& __c) {
+	  int_type __ch = get();
+	  if (__ch != traits_type::eof()) __c = traits_type::to_char_type(__ch);
+	  return *this;
+	}
+
+	basic_console& get(char_type* __s, streamsize __n) {
+	  return get(__s, __n, this->widen('\n'));
+	}
+
+	basic_console& get(char_type* __s, streamsize __n, char_type __dlm);
+
+	basic_console& get(basic_streambuf<char_type, traits_type>& __sb) {
+	  return get(__sb, this->widen('\n'));
+	}
+
+	basic_console& get(basic_streambuf<char_type, traits_type>& __sb,
+	                   char_type __dlm);
+
+	basic_console& getline(char_type* __s, streamsize __n) {
+	  return getline(__s, __n, this->widen('\n'));
+	}
+
+	basic_console& getline(char_type* __s, streamsize __n, char_type __dlm);
+
+	basic_console& ignore(streamsize __n = 1,
+	                      int_type __dlm = traits_type::eof());
+	int_type peek();
+	basic_istream& read(char_type* __s, streamsize __n);
+	streamsize readsome(char_type* __s, streamsize __n);
+
+	basic_console& putback(char_type __c);
+	basic_console& unget();
+	int sync();
+
+	pos_type tellg();
+	basic_console& seekg(pos_type __pos);
+	basic_console& seekg(off_type __off, ios_base::seekdir __dir);
+	//*/
+ private:
+	// virtual std::ostream ostream()=0;
+	// virtual std::istream istream()=0;
+ public:
+	template <typename T>
+	friend basic_console& operator<<(basic_console& lhs, T& rhs) {
+		lhs.ostream << rhs;
+		return lhs;
+	}
+	template <typename T>
+	friend basic_console& operator>>(basic_console& lhs, T& rhs) {
+		lhs.istream >> rhs;
+		return lhs;
+	}
 
  protected:
 	basic_console() {}  // do nothing as we are for extension

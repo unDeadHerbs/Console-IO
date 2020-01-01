@@ -109,5 +109,20 @@ std::string& NCursesConsole::operator[](uint row) {
 	// This will need to make a sub class that forwards the [] as a <<
 	// so that the buffering isn't interfeared with
 }
+// virtual basic_console& operator>>(basic_streambuf<char_type, traits_type>*
+// __sb)=0;
+// virtual basic_console& operator>>(bool& __n)=0;
+// virtual basic_console& operator>>(short& __n)=0;
+// virtual basic_console&  operator>>(unsigned short& __n)=0;
+// virtual basic_console& operator>>(int& __n)=0;
+// virtual basic_console& operator>>(unsigned int& __n)=0;
+// virtual basic_console& operator>>(long& __n)=0;
+// virtual basic_console& operator>>(unsigned long& __n)=0;
+// virtual basic_console& operator>>(long long& __n)=0;
+// virtual basic_console& operator>>(unsigned long long& __n)=0;
+// virtual basic_console& operator>>(float& __f)=0;
+// virtual basic_console& operator>>(double& __f)=0;
+// virtual basic_console& operator>>(long double& __f)=0;
+// virtual basic_console& operator>>(void*& __p)=0;
 
 }  // namespace udh
