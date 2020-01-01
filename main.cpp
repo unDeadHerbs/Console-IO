@@ -1,14 +1,11 @@
 #include <unistd.h>
 #include "ioconsole.hpp"
-using udh::NCursesConsole;
+using udh::cio;
 
 int main() {
 	sleep(1);
-	auto screen = NCursesConsole::Get();
-	screen->refreshScreen();
+	cio << "an bn  c";
 	sleep(1);
-	auto& f = screen->getFrame();
-	f[1][1] = 'a';
-	screen->refreshScreen();
+	cio << "nn(" << cio.size().first << "," << cio.size().second << ")";
 	sleep(1);
 }
