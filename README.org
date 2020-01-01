@@ -10,7 +10,7 @@ hopefully the dependency will be temporary.
 
 ** TODOs
 
-   - [ ] flush out the ~udh::console~ class and ~udh::cio~ to match
+   - [ ] flesh out the ~udh::console~ class and ~udh::cio~ to match
      [[https://en.cppreference.com/w/cpp/io/basic_ostream][~std::ostream~]] and [[https://en.cppreference.com/w/cpp/io/basic_istream][~std::istream~]] more closely.
 
    - [ ] Don't depend on ncurses.
