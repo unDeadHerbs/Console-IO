@@ -47,109 +47,8 @@ class basic_console {  //: virtual public basic_ios<_CharT,_Traits>{
 	basic_console(const basic_console& __rhs);
 	basic_console& operator=(const basic_console& __rhs);
 
- public:
-	/*
-	  what this do?
-	  class sentry;
-	*/
-
-	// For `endl` and `flush`
-	// TODO: I'm not sure why this verison worked and the old one didn't.
-	friend basic_console& operator<<(basic_console& lhs,
-	                                 basic_console& (*__pf)(basic_console&)) {
-		return __pf(lhs);
-	}
-	friend basic_console& operator>>(basic_console& lhs,
-	                                 basic_console& (*__pf)(basic_console&)) {
-		return __pf(lhs);
-	}
-
-	// Force implimentation of most basic types.
-	// TODO: Commented out tempraraly because I want to be lazy.
-
-	virtual basic_console& operator<<(char) = 0;
-	// virtual  basic_console& operator<<(bool)=0;
-	// virtual basic_console& operator<<(short)=0;
-	// virtual basic_console& operator<<(unsigned short)=0;
-	virtual basic_console& operator<<(int) = 0;
-	virtual basic_console& operator<<(unsigned int) = 0;
-	// virtual basic_console& operator<<(long)=0;
-	// virtual basic_console& operator<<(unsigned long)=0;
-	// virtual basic_console& operator<<(long long)=0;
-	// virtual basic_console& operator<<(unsigned long long)=0;
-	// virtual basic_console& operator<<(float)=0;
-	// virtual basic_console& operator<<(double)=0;
-	// virtual basic_console& operator<<(long double)=0;
-	virtual basic_console& operator<<(char const*) = 0;
-	// virtual basic_console& operator<<(std::basic_streambuf<char_type,
-	// traits_type>*)=0;
-
-	virtual basic_console& put(char_type) = 0;
-	// virtual basic_console& write(const char_type*, streamsize)=0;
-	virtual basic_console& flush() = 0;
-
-	// virtual basic_console& operator>>(basic_streambuf<char_type,
-	// traits_type>*)=0;
-
-	// virtual basic_console& operator>>(bool&)=0;
-	// virtual basic_console& operator>>(short&)=0;
-	// virtual basic_console& operator>>(unsigned short&)=0;
-	// virtual basic_console& operator>>(int&)=0;
-	// virtual basic_console& operator>>(unsigned int&)=0;
-	// virtual basic_console& operator>>(long&)=0;
-	// virtual basic_console& operator>>(unsigned long&)=0;
-	// virtual basic_console& operator>>(long long&)=0;
-	// virtual basic_console& operator>>(unsigned long long&)=0;
-	// virtual basic_console& operator>>(float&)=0;
-	// virtual basic_console& operator>>(double&)=0;
-	// virtual basic_console& operator>>(long double&)=0;
-	// virtual basic_console& operator>>(void*&)=0;
-
-	/*
-	streamsize gcount() const { return __gc_; }
-	int_type get();
-
-	basic_console& get(char_type& __c) {
-	  int_type __ch = get();
-	  if (__ch != traits_type::eof()) __c = traits_type::to_char_type(__ch);
-	  return *this;
-	}
-
-	basic_console& get(char_type* __s, streamsize __n) {
-	  return get(__s, __n, this->widen('\n'));
-	}
-
-	basic_console& get(char_type* __s, streamsize __n, char_type __dlm);
-
-	basic_console& get(basic_streambuf<char_type, traits_type>& __sb) {
-	  return get(__sb, this->widen('\n'));
-	}
-
-	basic_console& get(basic_streambuf<char_type, traits_type>& __sb,
-	                   char_type __dlm);
-
-	basic_console& getline(char_type* __s, streamsize __n) {
-	  return getline(__s, __n, this->widen('\n'));
-	}
-
-	basic_console& getline(char_type* __s, streamsize __n, char_type __dlm);
-
-	basic_console& ignore(streamsize __n = 1,
-	                      int_type __dlm = traits_type::eof());
-	int_type peek();
-	basic_istream& read(char_type* __s, streamsize __n);
-	streamsize readsome(char_type* __s, streamsize __n);
-
-	basic_console& putback(char_type __c);
-	basic_console& unget();
-	int sync();
-
-	pos_type tellg();
-	basic_console& seekg(pos_type __pos);
-	basic_console& seekg(off_type __off, ios_base::seekdir __dir);
-	//*/
  private:
-	// virtual std::ostream ostream()=0;
+	virtual std::ostream ostream() = 0;
 	// virtual std::istream istream()=0;
  public:
 	template <typename T>
@@ -167,19 +66,6 @@ class basic_console {  //: virtual public basic_ios<_CharT,_Traits>{
 	basic_console() {}  // do nothing as we are for extension
 };
 typedef basic_console<char> console;
-
-template <class _CharT, class _Traits>
-basic_console<_CharT, _Traits>& endl(basic_console<_CharT, _Traits>& __con) {
-	__con.put('\n');  //__con.put(__con.widen('\n'));
-	__con.flush();
-	return __con;
-}
-
-template <class _CharT, class _Traits>
-basic_console<_CharT, _Traits>& flush(basic_console<_CharT, _Traits>& __con) {
-	__con.flush();
-	return __con;
-}
 
 /**
  * A small wrapper for ncurses.
@@ -218,9 +104,7 @@ class NCursesConsole : public console {
 	 * Prevent users from constructing this class.
 	 */
 	NCursesConsole();
-	/**
-	 * Keep a pointer to the Singleton.
-	 */
+
 	std::pair<uint, uint> cursor;
 
  public:
@@ -253,16 +137,10 @@ class NCursesConsole : public console {
 	int getKey() const;
 
 	std::pair<uint, uint> size() const;
-	NCursesConsole& flush();
 
-	NCursesConsole& operator<<(std::string rhs);
-	NCursesConsole& operator<<(int rhs);
-	NCursesConsole& operator<<(uint rhs);
-	NCursesConsole& operator<<(char rhs);
-	NCursesConsole& operator<<(char const* rhs);
 	std::string& operator[](uint);
-
-	NCursesConsole& put(char);
+	class ostream_buffer : public std::stringbuf;
+	std::ostream ostream();
 };
 static auto& cio = *NCursesConsole::Get();
 };  // namespace udh
