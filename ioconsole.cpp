@@ -1,7 +1,7 @@
 #include "ioconsole.hpp"
 #include <ncurses.h>
 
-using namespace udh;
+namespace udh {
 
 NCursesConsole::NCursesConsole() {
 	initscr();
@@ -55,11 +55,21 @@ std::pair<uint, uint> NCursesConsole::size() const {
 NCursesConsole& NCursesConsole::operator<<(std::string rhs) {
 	// TODO: add wrapping
 	for (auto& c : rhs) {
-		f[cursor.first][cursor.second++] = c;
-		if (cursor.second == screenCols - 1) break;
+		if (c == '\n') {
+			if (cursor.first == screenRows - 1) break;
+			cursor.first++;
+			cursor.second = 0;
+		} else {
+			if (cursor.second == screenCols - 1) continue;
+			f[cursor.first][cursor.second++] = c;
+		}
 	}
 	refreshScreen();  // this should be behind a buffer.
 	return *this;
 }
 
-NCursesConsole& NCursesConsole::operator<<(int rhs) { return *this; }
+NCursesConsole& NCursesConsole::operator<<(int rhs) {
+	*this << std::to_string(rhs);  // extra lazy
+	return *this;
+}
+}  // namespace udh
