@@ -108,7 +108,7 @@ typedef basic_console<char> console;
  * This class defines a singelton object for manageing the ncurses
  * library.
  */
-class NCursesConsole {  //: console {
+class NCursesConsole : console {
  protected:
 	/**
 	 * This is a pointer to a WINDOW object in ncurses, but the ncurses
@@ -174,9 +174,11 @@ class NCursesConsole {  //: console {
 	int getKey() const;
 
 	std::pair<uint, uint> size() const;
+	void flush();
 
 	NCursesConsole& operator<<(std::string rhs);
 	NCursesConsole& operator<<(int rhs);
+	std::string& operator[](uint);
 };
 static auto& cio = *NCursesConsole::Get();
 };  // namespace udh

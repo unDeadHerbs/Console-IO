@@ -52,6 +52,8 @@ std::pair<uint, uint> NCursesConsole::size() const {
 	return std::make_pair(screenRows, screenCols);
 }
 
+void NCursesConsole::flush() { refreshScreen(); }
+
 NCursesConsole& NCursesConsole::operator<<(std::string rhs) {
 	// TODO: add wrapping
 	for (auto& c : rhs) {
@@ -64,12 +66,18 @@ NCursesConsole& NCursesConsole::operator<<(std::string rhs) {
 			f[cursor.first][cursor.second++] = c;
 		}
 	}
-	refreshScreen();  // this should be behind a buffer.
+	flush();  // this should be behind a buffer.
 	return *this;
 }
 
 NCursesConsole& NCursesConsole::operator<<(int rhs) {
 	*this << std::to_string(rhs);  // extra lazy
 	return *this;
+}
+
+std::string& NCursesConsole::operator[](uint row) {
+	return f[row];
+	// This will need to make a sub class that forwards the [] as a <<
+	// so that the buffering isn't interfeared with
 }
 }  // namespace udh
