@@ -52,7 +52,22 @@ std::pair<uint, uint> NCursesConsole::size() const {
 	return std::make_pair(screenRows, screenCols);
 }
 
-void NCursesConsole::flush() { refreshScreen(); }
+NCursesConsole& NCursesConsole::flush() {
+	refreshScreen();
+	return *this;
+}
+
+NCursesConsole& NCursesConsole::put(char c) {
+	if (c == '\n') {
+		if (cursor.first == screenRows - 1) return *this;
+		cursor.first++;
+		cursor.second = 0;
+	} else {
+		if (cursor.second == screenCols - 1) return *this;
+		f[cursor.first][cursor.second++] = c;
+	}
+	return *this;
+}
 
 NCursesConsole& NCursesConsole::operator<<(std::string rhs) {
 	// TODO: add wrapping
@@ -70,7 +85,20 @@ NCursesConsole& NCursesConsole::operator<<(std::string rhs) {
 	return *this;
 }
 
+NCursesConsole& NCursesConsole::operator<<(char const* rhs) {
+	*this << std::string(rhs);  // extra lazy
+	return *this;
+}
 NCursesConsole& NCursesConsole::operator<<(int rhs) {
+	*this << std::to_string(rhs);  // extra lazy
+	return *this;
+}
+NCursesConsole& NCursesConsole::operator<<(uint rhs) {
+	*this << std::to_string(rhs);  // extra lazy
+	return *this;
+}
+
+NCursesConsole& NCursesConsole::operator<<(char rhs) {
 	*this << std::to_string(rhs);  // extra lazy
 	return *this;
 }
@@ -80,4 +108,5 @@ std::string& NCursesConsole::operator[](uint row) {
 	// This will need to make a sub class that forwards the [] as a <<
 	// so that the buffering isn't interfeared with
 }
+
 }  // namespace udh

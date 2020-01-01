@@ -16,14 +16,12 @@ namespace udh {
 template <class _CharT, class _Traits = std::char_traits<_CharT>>
 class basic_console {  //: virtual public basic_ios<_CharT,_Traits>{
  public:
-	/*
 	// Types
 	typedef _CharT char_type;
 	typedef _Traits traits_type;
 	typedef typename traits_type::int_type int_type;
 	typedef typename traits_type::pos_type pos_type;
 	typedef typename traits_type::off_type off_type;
-	*/
 
 	/*
 	  explicit basic_console(basic_streambuf<char_type,traits_type>* __sb)
@@ -55,10 +53,11 @@ class basic_console {  //: virtual public basic_ios<_CharT,_Traits>{
 	  class sentry;
 	*/
 
-	// some sort of ability to have a printer function passed, and then just call
-	// that?
-	basic_console& operator<<(basic_console* (*__pf)(basic_console&)) {
-		return __pf(*this);
+	// For `endl` and `flush`
+	// TODO: I'm not sure why this verison worked and the old one didn't.
+	friend basic_console& operator<<(basic_console& lhs,
+	                                 basic_console& (*__pf)(basic_console&)) {
+		return __pf(lhs);
 	}
 	/*
 	  The same thing for the base classes?
@@ -74,33 +73,46 @@ class basic_console {  //: virtual public basic_ios<_CharT,_Traits>{
 	*/
 
 	// Force implimentation of most basic types.
-	// Commente out tempraraly because I want to be lazy.
-	/*
-	  basic_ostream& operator<<(bool);
-	  basic_ostream& operator<<(short);
-	  basic_ostream& operator<<(unsigned short);
-	  basic_ostream& operator<<(int);
-	  basic_ostream& operator<<(unsigned int);
-	  basic_ostream& operator<<(long);
-	  basic_ostream& operator<<(unsigned long);
-	  basic_ostream& operator<<(long long);
-	  basic_ostream& operator<<(unsigned long long);
-	  basic_ostream& operator<<(float);
-	  basic_ostream& operator<<(double);
-	  basic_ostream& operator<<(long double);
-	  basic_ostream& operator<<(const void*);
-	  basic_ostream& operator<<(basic_streambuf<char_type, traits_type>*);
-	*/
+	// TODO: Commented out tempraraly because I want to be lazy.
 
-	/* todo later
-	   basic_ostream& put(char_type);
-	   basic_ostream& write(const char_type*, streamsize);
-	   basic_ostream& flush();
-	*/
+	virtual basic_console& operator<<(char) = 0;
+	// virtual  basic_console& operator<<(bool)=0;
+	// virtual basic_console& operator<<(short)=0;
+	// virtual basic_console& operator<<(unsigned short)=0;
+	virtual basic_console& operator<<(int) = 0;
+	virtual basic_console& operator<<(unsigned int) = 0;
+	// virtual basic_console& operator<<(long)=0;
+	// virtual basic_console& operator<<(unsigned long)=0;
+	// virtual basic_console& operator<<(long long)=0;
+	// virtual basic_console& operator<<(unsigned long long)=0;
+	// virtual basic_console& operator<<(float)=0;
+	// virtual basic_console& operator<<(double)=0;
+	// virtual basic_console& operator<<(long double)=0;
+	virtual basic_console& operator<<(char const*) = 0;
+	// virtual basic_console& operator<<(std::basic_streambuf<char_type,
+	// traits_type>*)=0;
+
+	virtual basic_console& put(char_type) = 0;
+	// virtual basic_console& write(const char_type*, streamsize)=0;
+	virtual basic_console& flush() = 0;
+
  protected:
 	basic_console() {}  // do nothing as we are for extension
 };
 typedef basic_console<char> console;
+
+template <class _CharT, class _Traits>
+basic_console<_CharT, _Traits>& endl(basic_console<_CharT, _Traits>& __con) {
+	__con.put('\n');  //__con.put(__con.widen('\n'));
+	__con.flush();
+	return __con;
+}
+
+template <class _CharT, class _Traits>
+basic_console<_CharT, _Traits>& flush(basic_console<_CharT, _Traits>& __con) {
+	__con.flush();
+	return __con;
+}
 
 /**
  * A small wrapper for ncurses.
@@ -108,7 +120,7 @@ typedef basic_console<char> console;
  * This class defines a singelton object for manageing the ncurses
  * library.
  */
-class NCursesConsole : console {
+class NCursesConsole : public console {
  protected:
 	/**
 	 * This is a pointer to a WINDOW object in ncurses, but the ncurses
@@ -174,11 +186,16 @@ class NCursesConsole : console {
 	int getKey() const;
 
 	std::pair<uint, uint> size() const;
-	void flush();
+	NCursesConsole& flush();
 
 	NCursesConsole& operator<<(std::string rhs);
 	NCursesConsole& operator<<(int rhs);
+	NCursesConsole& operator<<(uint rhs);
+	NCursesConsole& operator<<(char rhs);
+	NCursesConsole& operator<<(char const* rhs);
 	std::string& operator[](uint);
+
+	NCursesConsole& put(char);
 };
 static auto& cio = *NCursesConsole::Get();
 };  // namespace udh
