@@ -58,6 +58,7 @@ NCursesConsole& NCursesConsole::flush() {
 }
 
 NCursesConsole& NCursesConsole::put(char c) {
+	// TODO: Have more of the others call this.
 	if (c == '\n') {
 		if (cursor.first == screenRows - 1) return *this;
 		cursor.first++;
@@ -67,6 +68,7 @@ NCursesConsole& NCursesConsole::put(char c) {
 		f[cursor.first][cursor.second++] = c;
 	}
 	return *this;
+	// TODO: have some buffer management here for if it should flush.
 }
 
 NCursesConsole& NCursesConsole::operator<<(std::string rhs) {
@@ -81,7 +83,6 @@ NCursesConsole& NCursesConsole::operator<<(std::string rhs) {
 			f[cursor.first][cursor.second++] = c;
 		}
 	}
-	flush();  // this should be behind a buffer.
 	return *this;
 }
 
