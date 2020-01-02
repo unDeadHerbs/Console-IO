@@ -42,7 +42,7 @@ void Snek::updateDisplay() {
 	if (!alive) cio[body[0].first][body[0].second] = '!';
 	cio[food.first][food.second] = 'a';
 	old_body = body;
-	cio.flush();
+	cio << std::flush;
 	sleep(1);
 }
 

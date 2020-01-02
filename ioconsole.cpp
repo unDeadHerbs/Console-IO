@@ -12,7 +12,6 @@ NCursesConsole::NCursesConsole() {
 	getmaxyx(stdscr, screenRows, screenCols);
 	win = newwin(screenRows, screenCols, 0, 0);
 	screenResizedTriger(0);
-	// cursor = std::make_pair(screenRows - 1, screenCols - 1);
 	cursor = std::make_pair(0, 0);
 }
 
@@ -51,19 +50,33 @@ std::pair<uint, uint> NCursesConsole::size() const {
 	return std::make_pair(screenRows, screenCols);
 }
 
-NCursesConsole& NCursesConsole::operator<<(std::string rhs) {
-	// TODO: add wrapping
-	for (auto& c : rhs) {
+int NCursesConsole::ostream_buffer::sync() {
+	auto s = this->str();
+	auto& cio = *Get();
+	for (auto& c : s) {
 		if (c == '\n') {
-			if (cursor.first == screenRows - 1) break;
-			cursor.first++;
-			cursor.second = 0;
+			if (cio.cursor.first == cio.screenRows - 1) break;
+			cio.cursor.first++;
+			cio.cursor.second = 0;
 		} else {
-			if (cursor.second == screenCols - 1) continue;
-			f[cursor.first][cursor.second++] = c;
+			if (cio.cursor.second == cio.screenCols - 1) continue;
+			cio.f[cio.cursor.first][cio.cursor.second++] = c;
 		}
 	}
-	return *this;
+	cio.refreshScreen();
+	this->str("");
+	return 0;
+}
+
+std::ostream& NCursesConsole::ostream() {
+	static std::unique_ptr<ostream_buffer> buffer_instance;
+	static std::unique_ptr<std::ostream> Instance;
+	if (!Instance) {
+		buffer_instance = std::unique_ptr<ostream_buffer>(new ostream_buffer);
+		Instance =
+		    std::unique_ptr<std::ostream>(new std::ostream(&*buffer_instance));
+	}
+	return *Instance;
 }
 
 std::string& NCursesConsole::operator[](uint row) {

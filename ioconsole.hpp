@@ -9,6 +9,7 @@
 #include <deque>
 #include <ios>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <utility>
 
@@ -48,22 +49,30 @@ class basic_console {  //: virtual public basic_ios<_CharT,_Traits>{
 	basic_console& operator=(const basic_console& __rhs);
 
  private:
-	virtual std::ostream ostream() = 0;
-	// virtual std::istream istream()=0;
+	virtual std::ostream& ostream() = 0;
+	// virtual std::istream& istream();
+
  public:
 	template <typename T>
-	friend basic_console& operator<<(basic_console& lhs, T& rhs) {
-		lhs.ostream << rhs;
+	friend basic_console& operator<<(basic_console& lhs, T rhs) {
+		lhs.ostream() << rhs;
 		return lhs;
 	}
+	// TODO: There's probably a more generic/better version of this.
+	friend basic_console& operator<<(basic_console& lhs,
+	                                 std::ostream& (*rhs)(std::ostream&)) {
+		rhs(lhs.ostream());
+		return lhs;
+	}
+
 	template <typename T>
 	friend basic_console& operator>>(basic_console& lhs, T& rhs) {
-		lhs.istream >> rhs;
+		lhs.istream() >> rhs;
 		return lhs;
 	}
 
  protected:
-	basic_console() {}  // do nothing as we are for extension
+	basic_console(){};  // do nothing as we are for extension
 };
 typedef basic_console<char> console;
 
@@ -139,8 +148,11 @@ class NCursesConsole : public console {
 	std::pair<uint, uint> size() const;
 
 	std::string& operator[](uint);
-	class ostream_buffer : public std::stringbuf;
-	std::ostream ostream();
+	class ostream_buffer : public std::stringbuf {
+		virtual int sync();
+	};
+	friend class ostream_buffer;
+	std::ostream& ostream();
 };
 static auto& cio = *NCursesConsole::Get();
 };  // namespace udh

@@ -1,8 +1,8 @@
 #include <unistd.h>
 #include "../ioconsole.hpp"
+using std::endl;
+using std::flush;
 using udh::cio;
-using udh::endl;
-using udh::flush;
 
 int main() {
 	sleep(1);
