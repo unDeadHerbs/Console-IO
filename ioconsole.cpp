@@ -1,4 +1,5 @@
 #include "ioconsole.hpp"
+
 #include <ncurses.h>
 
 namespace udh {
@@ -6,7 +7,9 @@ namespace udh {
 NCursesConsole::NCursesConsole() {
 	initscr();
 	cbreak();
+	nonl();
 	noecho();
+	intrflush(stdscr, FALSE);
 	keypad(stdscr, TRUE);
 	nodelay(stdscr, TRUE);
 	getmaxyx(stdscr, screenRows, screenCols);
@@ -28,16 +31,25 @@ void NCursesConsole::refreshScreen() {
 
 void NCursesConsole::screenResizedTriger(int code) {
 	getmaxyx((WINDOW*)win, screenRows, screenCols);
-	if (f.size() != screenRows) {
-		for (uint i = f.size(); i < screenRows; i++) f.push_back("");
-		for (uint i = f.size(); i > screenRows; i--) f.pop_back();
-	}
+	uint r = f.size();
+	for (; r < screenRows; r++) f.push_back("");
+	for (; r > screenRows; r--) f.pop_back();
 	for (uint j = 0; j < f.size(); j++) {
-		if (f[j].size() != screenCols) {
-			for (uint i = f[j].size(); i < screenCols; i++) f[j].push_back(' ');
-			for (uint i = f[j].size(); i > screenCols; i--) f[j].pop_back();
-		}
+		uint c = f[j].size();
+		for (; c < screenCols; c++) f[j].push_back(' ');
+		for (; c > screenCols; c--) f[j].pop_back();
 	}
+
+	/*
+	for (uint r = 0; r < screenRows; r++){
+	  if (r >= f.size(); r++) f.push_back("");
+	  uint c = f[r].size();
+	  for (; c < screenCols; c++) f[r].push_back(' ');
+	  for (; c > screenCols; c--) f[r].pop_back();
+	}
+	while (f.size() > screenRows) f.pop_back();
+	*/
+
 	refreshScreen();
 }
 
@@ -52,7 +64,7 @@ std::pair<uint, uint> NCursesConsole::size() const {
 
 int NCursesConsole::ostream_buffer::sync() {
 	auto s = this->str();
-	auto& cio = *Get();
+	auto& cio = *NCursesConsole::Get();
 	for (auto& c : s) {
 		if (c == '\n') {
 			if (cio.cursor.first == cio.screenRows - 1) break;

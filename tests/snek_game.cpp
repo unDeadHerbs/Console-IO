@@ -1,5 +1,7 @@
 #include "snek_game.hpp"
+
 #include <unistd.h>
+
 #include "../ioconsole.hpp"
 
 using udh::cio;
@@ -8,7 +10,7 @@ Snek::Snek() {
 	size = cio.size();
 	size.first -= 2;
 	size.second -= 2;
-	body.push_back({size.first / 2, size.second / 2});
+	body.push_back({6, 6});  //{size.first / 2, size.second / 2});
 	food = body[0];
 	food.second /= 2;  // TODO: make random
 	direction = none;
