@@ -12,6 +12,7 @@ class Snek {
 
  public:
 	typedef enum { none, up, right, down, left } Direction;
+  useconds_t sleep_time=100000;
 
  private:
 	Direction direction;

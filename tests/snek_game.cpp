@@ -1,6 +1,7 @@
 #include "snek_game.hpp"
 
 #include <unistd.h>
+#include <algorithm>
 
 #include "../ioconsole.hpp"
 
@@ -10,9 +11,11 @@ Snek::Snek() {
 	size = cio.size();
 	size.first -= 2;
 	size.second -= 2;
-	body.push_back({6, 6});  //{size.first / 2, size.second / 2});
+	body.push_back({size.first / 2, size.second / 2}); // Start in the center.
+
 	food = body[0];
-	food.second /= 2;  // TODO: make random
+	food.second /= 2;  // TODO: random
+
 	direction = none;
 	alive = true;
 
@@ -45,7 +48,7 @@ void Snek::updateDisplay() {
 	cio[food.first][food.second] = 'a';
 	old_body = body;
 	cio << std::flush;
-	sleep(1);
+	usleep(sleep_time);
 }
 
 bool Snek::move(Direction movement_input) {
@@ -68,9 +71,14 @@ bool Snek::move(Direction movement_input) {
 			break;
 	}
 	if (body[0] == food)
-		;  // generate new food
+	  while(std::find(body.begin(),body.end(),food)!=body.end()){ // Generate a new food.
+	    food.first++; // TODO: random, this is just lexicographic
+	    food.second+=food.first==size.first;
+	    food.first%=size.first;
+	    food.second%=size.second;
+	  }
 	else
-		body.pop_back();
+	  body.pop_back(); // Get longer by one.
 	if (body[0].first == 0 || body[0].first == size.first + 1 ||
 	    body[0].second == 0 || body[0].second == size.second + 1)
 		alive = false;
