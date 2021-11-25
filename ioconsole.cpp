@@ -15,7 +15,7 @@ NCursesConsole::NCursesConsole() {
   getmaxyx(stdscr, screenRows, screenCols);
   win = newwin(int(screenRows), int(screenCols), 0, 0); // check the bounds
   screenResizedTriger(0);
-  cursor = std::make_pair(0, 0);
+  cursor = {0, 0};
 }
 
 NCursesConsole::~NCursesConsole() { endwin(); }
@@ -59,7 +59,7 @@ void NCursesConsole::screenResizedTriger(int /*TODO: code*/) {
 
 int NCursesConsole::getKey() const {
   nodelay(stdscr, FALSE);
-  return getch();
+  return wgetch((WINDOW*)win);
 }
 
 std::pair<uint, uint> NCursesConsole::size() const {
@@ -105,5 +105,10 @@ std::string &NCursesConsole::operator[](uint row) {
   // This will need to make a sub class that forwards the [] as a <<
   // so that the buffering isn't interfeared with
 }
+
+	bool NCursesConsole::move_cursor(Cursor c){
+		cursor=c;
+		return true;
+	}
 
 } // namespace udh

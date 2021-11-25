@@ -23,6 +23,7 @@ public:
   typedef typename traits_type::int_type int_type;
   typedef typename traits_type::pos_type pos_type;
   typedef typename traits_type::off_type off_type;
+  typedef std::pair<uint, uint> Cursor;
 
   /*
     explicit basic_console(basic_streambuf<char_type,traits_type>* __sb)
@@ -50,7 +51,7 @@ protected:
 
 private:
   virtual std::ostream &ostream() = 0;
-  // virtual std::istream& istream();
+  //virtual std::istream &istream() = 0;
 
 public:
   template <typename T>
@@ -71,8 +72,10 @@ public:
     return lhs;
   }
 
+  virtual bool move_cursor(Cursor)=0;
+
 protected:
-  basic_console() {} // do nothing as we are for extension
+  basic_console() {} // Do nothing, as this is for extensions.
 };
 typedef basic_console<char> console;
 
@@ -114,7 +117,7 @@ protected:
    */
   NCursesConsole();
 
-  std::pair<uint, uint> cursor;
+  Cursor cursor;
 
 public:
   ~NCursesConsole();
@@ -156,6 +159,8 @@ public:
   };
   friend class ostream_buffer;
   std::ostream &ostream();
+
+  bool move_cursor(Cursor);
 };
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wglobal-constructors"
