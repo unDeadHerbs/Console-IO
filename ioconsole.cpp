@@ -21,8 +21,10 @@ NCursesConsole::NCursesConsole() {
 NCursesConsole::~NCursesConsole() { endwin(); }
 
 void NCursesConsole::refreshScreen() {
-  for (uint row = 0; row < size().first; row++) {
+	f.resize(screenRows,{});
+  for (uint row = 0; row < screenRows; row++) {
     wmove((WINDOW *)win, int(row), 0); // Check bounds
+    f[row].resize(int(screenCols),' ');
     waddstr((WINDOW *)win, f[row].c_str());
   }
   wmove((WINDOW *)win, int(cursor.first), int(cursor.second)); // Check bounds
@@ -31,29 +33,10 @@ void NCursesConsole::refreshScreen() {
 
 void NCursesConsole::screenResizedTriger(int /*TODO: code*/) {
   getmaxyx((WINDOW *)win, screenRows, screenCols);
-  auto r = f.size();
-  for (; r < screenRows; r++)
-    f.push_back("");
-  for (; r > screenRows; r--)
-    f.pop_back();
-  for (uint j = 0; j < f.size(); j++) {
-    auto c = f[j].size();
-    for (; c < screenCols; c++)
-      f[j].push_back(' ');
-    for (; c > screenCols; c--)
-      f[j].pop_back();
-  }
-
-  /*
-  for (uint r = 0; r < screenRows; r++){
-    if (r >= f.size(); r++) f.push_back("");
-    uint c = f[r].size();
-    for (; c < screenCols; c++) f[r].push_back(' ');
-    for (; c > screenCols; c--) f[r].pop_back();
-  }
-  while (f.size() > screenRows) f.pop_back();
-  */
-
+  // Currently this is already done by redrawing the screen.
+  //f.resize(screenRows,{});
+  //for (uint row = 0; row < screenRows; row++)
+  //  f[row].resize(screenCols,' ');
   refreshScreen();
 }
 
