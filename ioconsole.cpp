@@ -29,7 +29,7 @@ void NCursesConsole::refreshScreen() {
   wrefresh((WINDOW *)win);
 }
 
-  void NCursesConsole::screenResizedTriger(int /*TODO: code*/) {
+void NCursesConsole::screenResizedTriger(int /*TODO: code*/) {
   getmaxyx((WINDOW *)win, screenRows, screenCols);
   auto r = f.size();
   for (; r < screenRows; r++)
@@ -68,7 +68,7 @@ std::pair<uint, uint> NCursesConsole::size() const {
 
 int NCursesConsole::ostream_buffer::sync() {
   auto s = this->str();
-  //auto &cio = *NCursesConsole::Get();
+  // auto &cio = *NCursesConsole::Get();
   for (auto &c : s) {
     if (c == '\n') {
       if (cio.cursor.first == cio.screenRows - 1)

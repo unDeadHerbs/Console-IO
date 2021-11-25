@@ -72,7 +72,7 @@ public:
   }
 
 protected:
-  basic_console(){} // do nothing as we are for extension
+  basic_console() {} // do nothing as we are for extension
 };
 typedef basic_console<char> console;
 
