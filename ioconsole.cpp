@@ -22,6 +22,8 @@ NCursesConsole::NCursesConsole() {
   win = newwin(int(screenRows), int(screenCols), 0, 0); // check the bounds
   screenResizedTriger(0);
   cursor = {0, 0};
+  has_colour=has_colors();
+  if(has_colour)start_color();
 }
 
 NCursesConsole::~NCursesConsole() {
@@ -102,7 +104,7 @@ std::ostream &NCursesConsole::ostream() {
   return *Instance;
 }
 
-std::string &NCursesConsole::operator[](uint row) {
+colour_string &NCursesConsole::operator[](uint row) {
   std::lock_guard g(lock_ncurses);
   // Just a segfault guard, it's not really above's fault if our size is off.
   if(f.size()<screenRows) f.resize(screenRows);

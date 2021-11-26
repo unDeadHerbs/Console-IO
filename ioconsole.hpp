@@ -79,13 +79,85 @@ protected:
 };
 typedef basic_console<char> console;
 
+// TODO: Specialize on number of colours supported with an "UNKNOWN"
+// option.
+struct colour_char{
+  enum COLOUR{
+    BLACK,       RED,       GREEN,       YELLOW,       BLUE,       MAGENTA,       CYAN,      WHITE,
+    GRAY ,BRIGHT_RED,BRIGHT_GREEN,BRIGHT_YELLOW,BRIGHT_BLUE,BRIGHT_MAGENTA,BRIGHT_CYAN,BRIGHT_WHITE};
+  char c;
+  int bg;
+  int fg;
+  colour_char()=default;
+  colour_char(char ch):c(ch),bg(COLOUR::BLACK),fg(COLOUR::WHITE){}
+  colour_char& operator=(char ch){c=ch; return *this;}
+  operator char()const{return c;}
+};
+
+struct slice_range{
+  int start;
+  int end;
+  int step=1;
+};
+  
+class colour_string{
+  /// The underlying container.
+  std::basic_string<colour_char> s;
+  /// A normal string for speed.
+  std::string _str;
+  colour_string(std::basic_string<colour_char> cs,std::string str):s(cs),_str(str){}
+public:
+  colour_string()=default;
+  colour_string(std::string str):_str(str){
+    s.reserve(str.size());
+    for(auto const & c:str)s.push_back(c);
+  }
+  auto size()const{return _str.size();}
+  auto c_str()const{
+    return _str.c_str();
+  }
+  colour_string operator+(colour_string const & rhs)const{
+    return {s+rhs.s,_str+rhs._str};
+  }
+  colour_string& operator+=(colour_char const & rhs){
+    s+=rhs;
+    _str+=rhs;
+    return *this;
+  }
+  [[nodiscard]] auto operator[](int pos){
+    // Enable python style reverse indexing.
+    //assert(pos>=-s.size());
+    //assert(pos<s.size());
+    if(pos<0)
+      pos+=s.size();
+    return s[pos];
+  }
+
+  [[nodiscard]] colour_string const operator[](slice_range range){
+    // TODO: return type const so that it can later hand back a
+    // reference to a mutable sub-string.
+    if(range.start<0) range.start+=s.size();
+    if(range.end<0) range.end+=s.size();
+    // TODO: range.step
+    return {s.substr(range.start,range.end),
+            _str.substr(range.start,range.end)};
+  }
+  auto pop_back(){
+    _str.pop_back();
+    return s.pop_back();
+  }
+  inline constexpr void resize(size_t count, colour_char ch=' '){
+    s.resize(count, ch);
+    _str.resize(count,ch);
+  }
+};
 /**
  * A small wrapper for ncurses.
  *
  * This class defines a singelton object for manageing the ncurses
  * library.
  */
-class NCursesConsole : public console {
+class NCursesConsole : public basic_console<colour_char> {
 protected:
   /**
    * This is a pointer to a WINDOW object in ncurses, but the ncurses
@@ -95,7 +167,9 @@ protected:
   void *win;
   typedef unsigned int uint;
   uint screenRows, screenCols;
-  std::deque<std::string> f;
+  /// The internal container for the screen.
+  std::deque<colour_string> f;
+  bool has_colour;
 
   /**
    * Anti-Copy Constructor
@@ -153,12 +227,12 @@ public:
 
   std::pair<uint, uint> size() const;
 
-  std::string &operator[](uint);
+  colour_string& operator[](uint);
   class ostream_buffer : public std::stringbuf {
     virtual int sync();
   };
   friend class ostream_buffer;
-  std::ostream &ostream();
+  std::ostream& ostream();
 
   bool move_cursor(Cursor);
 };
