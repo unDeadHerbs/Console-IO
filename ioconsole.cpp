@@ -71,7 +71,7 @@ void NCursesConsole::refreshScreen() {
   std::lock_guard g(lock_ncurses);
   for (int row = 0; row < LINES; row++) {
     f[row].resize(COLS,' ');
-    move(row, 0); // Check bounds
+    move(row, 0);
     if(has_colors())
       // TODO: This is very inefficient, try to check for changes and
       // for if there are ranges of color that don't need toggling.
@@ -128,7 +128,7 @@ int NCursesConsole::ostream_buffer::sync() {
     } else {
       if (cio.cursor.second == COLS - 1)
         continue;
-      cio.f[cio.cursor.first][cio.cursor.second++] = c;
+      cio.f[cio.cursor.first].set(cio.cursor.second++,c);
     }
   }
   cio.refreshScreen();

@@ -121,6 +121,17 @@ class colour_string{
   colour_string(std::basic_string<colour_char> cs,std::string str):s(cs),_str(str){}
 public:
   colour_string()=default;
+  colour_string(std::string str,std::optional<colour_char::COLOUR> fg):_str(str){
+    s.reserve(str.size());
+    if(fg)
+      for(auto const & c:str){
+        s.push_back(c);
+        s.rbegin()->fg=*fg;
+      }
+    else
+      for(auto const & c:str)
+        s.push_back(c);
+  }
   colour_string(std::string str):_str(str){
     s.reserve(str.size());
     for(auto const & c:str)s.push_back(c);
@@ -129,23 +140,29 @@ public:
   auto c_str()const{
     return _str.c_str();
   }
-  colour_string operator+(colour_string const & rhs)const{
-    return {s+rhs.s,_str+rhs._str};
+  colour_string operator+=(colour_string const & rhs){
+    s+=rhs.s;
+    _str+=rhs._str;
+    return *this;
   }
+  colour_string operator+(colour_string const & rhs)const{
+    return {s+rhs.s,_str+rhs._str};  
+}
   colour_string& operator+=(colour_char const & rhs){
     s+=rhs;
     _str+=rhs;
     return *this;
   }
-  [[nodiscard]] auto operator[](int pos){
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wignored-qualifiers"
+  [[nodiscard]] auto const operator[](int pos){
+ #pragma clang diagnostic pop
     // Enable python style reverse indexing.
-    //assert(pos>=-s.size());
-    //assert(pos<s.size());
     if(pos<0)
       pos+=s.size();
+    // TODO: Const until can write to both containers.
     return s[pos];
   }
-
   [[nodiscard]] colour_string const operator[](slice_range range){
     // TODO: return type const so that it can later hand back a
     // reference to a mutable sub-string.
@@ -153,6 +170,11 @@ public:
     // TODO: range.step
     return {s.substr(range.start,range.end),
             _str.substr(range.start,range.end)};
+  }
+  colour_string& set(int pos,colour_char val){
+    s[pos]=val;
+    _str[pos]=val;
+    return *this;
   }
   auto pop_back(){
     _str.pop_back();
