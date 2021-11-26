@@ -2,9 +2,15 @@
 
 #include <ncurses.h>
 
+// TODO: Check if threading is enabled?
+#include <mutex>
+
+std::recursive_mutex lock_ncurses;
+
 namespace udh {
 
 NCursesConsole::NCursesConsole() {
+	std::lock_guard g(lock_ncurses);
   initscr();
   cbreak();
   nonl();
@@ -18,10 +24,14 @@ NCursesConsole::NCursesConsole() {
   cursor = {0, 0};
 }
 
-NCursesConsole::~NCursesConsole() { endwin(); }
+NCursesConsole::~NCursesConsole() {
+	std::lock_guard g(lock_ncurses);
+	endwin();
+}
 
 void NCursesConsole::refreshScreen() {
 	f.resize(screenRows,{});
+	std::lock_guard g(lock_ncurses);
   for (uint row = 0; row < screenRows; row++) {
     wmove((WINDOW *)win, int(row), 0); // Check bounds
     f[row].resize(int(screenCols),' ');
@@ -32,6 +42,7 @@ void NCursesConsole::refreshScreen() {
 }
 
 void NCursesConsole::screenResizedTriger(int /*TODO: code*/) {
+	std::lock_guard g(lock_ncurses);
   getmaxyx((WINDOW *)win, screenRows, screenCols);
   // Currently this is already done by redrawing the screen.
   //f.resize(screenRows,{});
@@ -40,8 +51,10 @@ void NCursesConsole::screenResizedTriger(int /*TODO: code*/) {
   refreshScreen();
 }
 
-int NCursesConsole::getKey() const {
-  nodelay(stdscr, FALSE);
+int NCursesConsole::getKey(bool blocking) const {
+	// Not locking because this is the only read.  I think this is safe
+	// for now.
+  nodelay(stdscr, !blocking);
   return wgetch((WINDOW*)win);
 }
 
@@ -89,9 +102,9 @@ std::string &NCursesConsole::operator[](uint row) {
   // so that the buffering isn't interfeared with
 }
 
-	bool NCursesConsole::move_cursor(Cursor c){
-		cursor=c;
-		return true;
-	}
+bool NCursesConsole::move_cursor(Cursor c){
+	cursor=c;
+	return true;
+}
 
 } // namespace udh

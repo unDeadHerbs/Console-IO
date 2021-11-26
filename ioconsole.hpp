@@ -149,7 +149,7 @@ public:
   /**
    * Read in one char from the user.
    */
-  int getKey() const;
+  int getKey(bool blocking) const;
 
   std::pair<uint, uint> size() const;
 
