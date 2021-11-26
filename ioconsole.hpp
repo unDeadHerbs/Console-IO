@@ -9,6 +9,7 @@
 #include <deque>
 #include <ios>
 #include <memory>
+#include <optional>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -23,7 +24,7 @@ public:
   typedef typename traits_type::int_type int_type;
   typedef typename traits_type::pos_type pos_type;
   typedef typename traits_type::off_type off_type;
-  typedef std::pair<uint, uint> Cursor;
+  typedef std::pair<int, int> Cursor; // Left signed for ordinal optimizations.
 
   /*
     explicit basic_console(basic_streambuf<char_type,traits_type>* __sb)
@@ -83,13 +84,20 @@ typedef basic_console<char> console;
 // option.
 struct colour_char{
   enum COLOUR{
-    BLACK,       RED,       GREEN,       YELLOW,       BLUE,       MAGENTA,       CYAN,      WHITE,
-    GRAY ,BRIGHT_RED,BRIGHT_GREEN,BRIGHT_YELLOW,BRIGHT_BLUE,BRIGHT_MAGENTA,BRIGHT_CYAN,BRIGHT_WHITE};
+    BLACK=0b000,
+    RED=0b001,
+    GREEN=0b010,
+    YELLOW=0b011,
+    BLUE=0b100,
+    MAGENTA=0b101,
+    CYAN=0b110,
+    WHITE=0b111};
+  // GRAY ,BRIGHT_RED,BRIGHT_GREEN,BRIGHT_YELLOW,BRIGHT_BLUE,BRIGHT_MAGENTA,BRIGHT_CYAN,BRIGHT_WHITE};
   char c;
   int bg;
   int fg;
   colour_char()=default;
-  colour_char(char ch):c(ch),bg(COLOUR::BLACK),fg(COLOUR::WHITE){}
+  colour_char(char ch,COLOUR fg_=WHITE):c(ch),bg(COLOUR::BLACK),fg(fg_){}
   colour_char& operator=(char ch){c=ch; return *this;}
   operator char()const{return c;}
 };
@@ -98,6 +106,11 @@ struct slice_range{
   int start;
   int end;
   int step=1;
+  slice_range& scope(int const size){
+    if(start<0)start+=size;
+    if(end<0)end+=size;
+    return *this;
+  }
 };
   
 class colour_string{
@@ -136,8 +149,7 @@ public:
   [[nodiscard]] colour_string const operator[](slice_range range){
     // TODO: return type const so that it can later hand back a
     // reference to a mutable sub-string.
-    if(range.start<0) range.start+=s.size();
-    if(range.end<0) range.end+=s.size();
+    range.scope(_str.size());
     // TODO: range.step
     return {s.substr(range.start,range.end),
             _str.substr(range.start,range.end)};
@@ -149,6 +161,14 @@ public:
   inline constexpr void resize(size_t count, colour_char ch=' '){
     s.resize(count, ch);
     _str.resize(count,ch);
+  }
+  void colour(slice_range range,colour_char::COLOUR fg,std::optional<colour_char::COLOUR> bg={}){
+    // TODO: range.step
+    range.scope(_str.size());
+    for(int p=range.start;p<=range.end;p++){
+      s[p].fg=fg;
+      if(bg)s[p].bg=*bg;
+    }
   }
 };
 /**
@@ -164,12 +184,9 @@ protected:
    * libaray makes a bunch of globabl variables so i'm encapsulating
    * it in udh_frame.cpp where it won't bother anything else.
    */
-  void *win;
-  typedef unsigned int uint;
-  uint screenRows, screenCols;
+  //void *win;
   /// The internal container for the screen.
   std::deque<colour_string> f;
-  bool has_colour;
 
   /**
    * Anti-Copy Constructor
