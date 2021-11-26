@@ -10,7 +10,7 @@ std::recursive_mutex lock_ncurses;
 namespace udh {
 
 NCursesConsole::NCursesConsole() {
-	std::lock_guard g(lock_ncurses);
+  std::lock_guard g(lock_ncurses);
   initscr();
   cbreak();
   nonl();
@@ -25,13 +25,13 @@ NCursesConsole::NCursesConsole() {
 }
 
 NCursesConsole::~NCursesConsole() {
-	std::lock_guard g(lock_ncurses);
-	endwin();
+  std::lock_guard g(lock_ncurses);
+  endwin();
 }
 
 void NCursesConsole::refreshScreen() {
-	f.resize(screenRows,{});
-	std::lock_guard g(lock_ncurses);
+  f.resize(screenRows,{});
+  std::lock_guard g(lock_ncurses);
   for (uint row = 0; row < screenRows; row++) {
     wmove((WINDOW *)win, int(row), 0); // Check bounds
     f[row].resize(int(screenCols),' ');
@@ -42,19 +42,25 @@ void NCursesConsole::refreshScreen() {
 }
 
 void NCursesConsole::screenResizedTriger(int /*TODO: code*/) {
-	std::lock_guard g(lock_ncurses);
+  std::lock_guard g(lock_ncurses);
   getmaxyx((WINDOW *)win, screenRows, screenCols);
   // Currently this is already done by redrawing the screen.
   //f.resize(screenRows,{});
   //for (uint row = 0; row < screenRows; row++)
   //  f[row].resize(screenCols,' ');
-  refreshScreen();
+
+  // Not refreshing the screen makes the single handler faster.  The
+  // overarching application can deal with that.  The lock is already
+  // a pretty expensive operation to have in here.
+  // TODO: Defer this work so that there's no lock.
+  //refreshScreen();
 }
 
 int NCursesConsole::getKey(bool blocking) const {
-	// Not locking because this is the only read.  I think this is safe
-	// for now.
-  nodelay(stdscr, !blocking);
+  // Not locking because this is the only read.  I think this is safe
+  // for now.
+  //std::lock_guard g(lock_ncurses);
+  nodelay((WINDOW *)win, !blocking);
   return wgetch((WINDOW*)win);
 }
 
@@ -97,14 +103,20 @@ std::ostream &NCursesConsole::ostream() {
 }
 
 std::string &NCursesConsole::operator[](uint row) {
+  std::lock_guard g(lock_ncurses);
+  // Just a segfault guard, it's not really above's fault if our size is off.
+  if(f.size()<screenRows) f.resize(screenRows);
+  if(f[row].size()<screenCols) f[row].resize(screenCols);
   return f[row];
   // This will need to make a sub class that forwards the [] as a <<
-  // so that the buffering isn't interfeared with
+  // so that the buffering isn't interfeared with.  Also, the lock
+  // will probably want to be held by that sub object, this is
+  // technically a race.
 }
 
 bool NCursesConsole::move_cursor(Cursor c){
-	cursor=c;
-	return true;
+  cursor=c;
+  return true;
 }
 
 } // namespace udh
