@@ -133,6 +133,7 @@ public:
         s[p].bg = *bg;
     }
   }
+  auto operator<=>(colour_string const &) const = default;
 };
 } // namespace udh
 #endif
