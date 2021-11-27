@@ -1,20 +1,20 @@
-#include "snek_game.hpp"
-
 #include <algorithm>
 #include <unistd.h>
 
-#include "../ioconsole.hpp"
+#include "../NCursesConsole.hpp"
+
+#include "snek_game.hpp"
 
 using udh::cio;
 
 Snek::Snek() {
   size = cio.size();
-  size.first -= 2;
-  size.second -= 2;
-  body.push_back({size.first / 2, size.second / 2}); // Start in the center.
+  size.rows -= 2;
+  size.cols -= 2;
+  body.push_back({size.rows / 2, size.cols / 2}); // Start in the center.
 
   food = body[0];
-  food.second /= 2; // TODO: random
+  food.col /= 2; // TODO: random
 
   direction = none;
   alive = true;
@@ -24,29 +24,29 @@ Snek::Snek() {
 }
 
 void Snek::drawWalls() {
-  cio[0][0] = '+';
-  cio[size.first + 1][0] = '+';
-  cio[0][size.second + 1] = '+';
-  cio[size.first + 1][size.second + 1] = '+';
-  for (uint c = 1; c <= size.second; c++) {
-    cio[0][c] = '-';
-    cio[size.first + 1][c] = '-';
+  cio[0].set(0, '+');
+  cio[size.rows + 1].set(0, '+');
+  cio[0].set(size.cols + 1, '+');
+  cio[size.rows + 1].set(size.cols + 1, '+');
+  for (int c = 1; c <= size.cols; c++) {
+    cio[0].set(c, '-');
+    cio[size.rows + 1].set(c, '-');
   }
-  for (uint r = 1; r <= size.first; r++) {
-    cio[r][0] = '|';
-    cio[r][size.second + 1] = '|';
+  for (int r = 1; r <= size.rows; r++) {
+    cio[r].set(0, '|');
+    cio[r].set(size.cols + 1, '|');
   }
 }
 
 void Snek::updateDisplay() {
-  static std::vector<std::pair<uint, uint>> old_body;
+  static decltype(Snek::body) old_body;
   for (auto &p : old_body)
-    cio[p.first][p.second] = ' '; // should need to rm 1 or 0
+    cio[p.row].set(p.col, ' '); // should need to rm 1 or 0
   for (auto &p : body)
-    cio[p.first][p.second] = '#'; // should only need to add one
+    cio[p.row].set(p.col, '#'); // should only need to add one
   if (!alive)
-    cio[body[0].first][body[0].second] = '!';
-  cio[food.first][food.second] = 'a';
+    cio[body[0].row].set(body[0].col, '!');
+  cio[food.row].set(food.col, 'a');
   old_body = body;
   cio << std::flush;
   usleep(sleep_time);
@@ -60,30 +60,30 @@ bool Snek::move(Direction movement_input) {
   case none:
     return true;
   case up:
-    body.insert(body.begin(), {body[0].first - 1, body[0].second});
+    body.insert(body.begin(), {body[0].row - 1, body[0].col});
     break;
   case right:
-    body.insert(body.begin(), {body[0].first, body[0].second + 1});
+    body.insert(body.begin(), {body[0].row, body[0].col + 1});
     break;
   case down:
-    body.insert(body.begin(), {body[0].first + 1, body[0].second});
+    body.insert(body.begin(), {body[0].row + 1, body[0].col});
     break;
   case left:
-    body.insert(body.begin(), {body[0].first, body[0].second - 1});
+    body.insert(body.begin(), {body[0].row, body[0].col - 1});
     break;
   }
   if (body[0] == food)
     while (std::find(body.begin(), body.end(), food) !=
            body.end()) { // Generate a new food.
-      food.first++;      // TODO: random, this is just lexicographic
-      food.second += food.first == size.first;
-      food.first %= size.first;
-      food.second %= size.second;
+      food.row++;        // TODO: random, this is just lexicographic
+      food.col += food.row == size.rows;
+      food.row %= size.rows;
+      food.col %= size.cols;
     }
   else
     body.pop_back(); // Get longer by one.
-  if (body[0].first == 0 || body[0].first == size.first + 1 ||
-      body[0].second == 0 || body[0].second == size.second + 1)
+  if (body[0].row == 0 || body[0].row == size.rows + 1 || body[0].col == 0 ||
+      body[0].col == size.cols + 1)
     alive = false;
   updateDisplay();
   return true;

@@ -5,10 +5,13 @@
 #include <utility>
 #include <vector>
 
+#include "../NCursesConsole.hpp"
+#include "../ioconsole.hpp"
+
 class Snek {
-  std::pair<uint, uint> size;
-  std::vector<std::pair<uint, uint>> body; // [0] is head
-  std::pair<uint, uint> food;
+  udh::NCursesConsole::ScreenSize size;
+  std::vector<udh::Cursor> body; // [0] is head
+  udh::Cursor food;
 
 public:
   typedef enum { none, up, right, down, left } Direction;

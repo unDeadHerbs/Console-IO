@@ -76,7 +76,7 @@ histogram:
 	@echo " - Building a histogram of used words - "
 	@git ls | cut -f 2 | egrep "[.][ch](pp|)$$" | \
 	 while read f; do cat $$f; done | \
-	 sed 's/\(\s\|[]({,<=>;})[*/+-]\|[0-9]\)/\n/g'|grep -v "^$"|\
+	 sed 's/\(\s\|[]({,<=>;})[*/+-]\|[0-9]\)/\n/g'|grep -v "^$$"|\
 	 sort|uniq -c|sort -gr|head
 
 include $(wildcard $(DEPDIR)/*.d)

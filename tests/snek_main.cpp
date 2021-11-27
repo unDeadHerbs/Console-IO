@@ -1,4 +1,5 @@
 #include "snek_game.hpp"
+#include <tuple> // for std::ignore
 
 using Direction = Snek::Direction;
 
@@ -7,7 +8,10 @@ class SnekAI {
 
 public:
   SnekAI(Snek const &S) : s(S) {}
-  Direction get_move() { return Direction::left; }
+  Direction get_move() {
+    std::ignore = s;
+    return Direction::left;
+  }
 };
 
 int main() {
