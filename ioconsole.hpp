@@ -67,7 +67,11 @@ public:
     rhs(lhs.ostream());
     return lhs;
   }
-
+  friend basic_console &operator<<(basic_console &lhs,
+                                   basic_console &(*rhs)(basic_console &)) {
+    return rhs(lhs);
+  }
+  
   template <typename T>
   friend basic_console &operator>>(basic_console &lhs, T &rhs) {
     lhs.istream() >> rhs;
